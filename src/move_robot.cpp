@@ -1,5 +1,7 @@
+#include "geometry_msgs/msg/detail/twist__struct.h"
+#include "geometry_msgs/msg/detail/twist__struct.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/int32.hpp"
 #include <chrono>
 
 using namespace std::chrono_literals;
@@ -9,22 +11,21 @@ using namespace std::chrono_literals;
 
 class VelocityPublisher : public rclcpp::Node {
 public:
-  VelocityPublisher() : Node("simple_publisher"), count_(0) {
-    publisher_ = this->create_publisher<std_msgs::msg::Int32>("counter", 10);
+  VelocityPublisher() : Node("velocity_publisher") {
+    publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
     timer_ = this->create_wall_timer(
-        500ms, std::bind(&VelocityPublisher::timer_callback, this));
+        200ms, std::bind(&VelocityPublisher::velocity_callback, this));
   }
 
 private:
-  void timer_callback() {
-    auto message = std_msgs::msg::Int32();
-    message.data = count_;
-    count_++;
+  void velocity_callback() {
+    auto message = geometry_msgs::msg::Twist();
+    message.linear.x = 0.2;
+    message.angular.z = 0.2;
     publisher_->publish(message);
   }
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
-  size_t count_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
 };
 
 int main(int argc, char *argv[]) {
